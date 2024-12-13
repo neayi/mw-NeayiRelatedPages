@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shirayuki",
+			"Umherirrender",
+			"Amire80",
+			"Fhocutt",
+			"Liuxinyu970226"
+		]
+	},
+	"neayirelatedpages-desc": "{{desc|name=NeayiRelatedPages|url=https://github.com/... }}",
+	"neayirelatedpages-i18n-welcome": "Used to greet the user when reading the i18n/??.json file.",
+	"apihelp-query+relatedpages-summary": "Returns a list of related pages",
+	"apihelp-relatedpages-example": "Return related pages for page Agroforesterie"
+	
+}

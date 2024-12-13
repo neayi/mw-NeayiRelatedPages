@@ -1,0 +1,67 @@
+{
+	"name": "NeayiRelatedPages",
+	"version": "0.1.0",
+	"author": [
+		"Bertrand Gorge"
+	],
+	"requires": {
+		"MediaWiki": ">= 1.39.0",
+		"extensions": {
+			"SemanticMediaWiki": ">= 3.0"
+		},
+		"platform": {
+			"php": ">= 7.4"
+		}
+	},	
+	"url": "https://github.com/...",
+	"descriptionmsg": "neayirelatedpages-desc",
+	"license-name": "GPL v2",
+	"type": "parserhook",
+	"AutoloadClasses": {
+		"NeayiRelatedPagesHooks": "NeayiRelatedPages.hooks.php",
+		"NeayiRelatedPages\\APIRelatedPages": "src/ApiRelatedPages.php"
+	},
+	"AutoloadNamespaces": {
+		"NeayiRelatedPages\\": "src/"
+	},
+	"config": {
+		"NeayiRelatedPagesEnableFoo": true
+	},
+	"ExtensionMessagesFiles": {
+		"NeayiRelatedPagesMagic": "NeayiRelatedPages.i18n.magic.php"
+	},
+	"Hooks": {
+		
+		"ParserFirstCallInit": [
+			"NeayiRelatedPagesHooks::onParserFirstCallInit"
+		]
+	},
+	"APIPropModules": {
+		"relatedpages": {
+			"class": "NeayiRelatedPages\\APIRelatedPages",
+			"services": [
+				"MainWANObjectCache",
+				"WikiPageFactory"
+			]
+		}
+	},	
+	"MessagesDirs": {
+		"NeayiRelatedPages": [
+			"i18n"
+		]
+	},
+	"ResourceModules": {
+		"ext.neayiRelatedPages": {
+			"scripts": [
+				"modules/ext.neayiRelatedPages.js"
+			],
+			"messages": [],
+			"dependencies": []
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "NeayiRelatedPages"
+	},
+	"manifest_version": 1
+}

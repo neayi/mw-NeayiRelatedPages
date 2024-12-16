@@ -57,7 +57,7 @@ var NeayiRelatedPages_controller = ( function () {
 
 						let pages = pageTypes[aType];
 						
-						let searchURL = "/index.php?title=Search&filters=A+un+type+de+page%5E%5E"+encodeURIComponent(aType)+"&term=" + encodeURIComponent(mw.config.get("wgPageName"));
+						let searchURL = "/index.php?title=Search&filters=A+un+type+de+page%5E%5E"+encodeURIComponent(aType)+"&term=" + encodeURIComponent(mw.config.get("wgTitle"));
 						let html = `<div class="row navigation-not-searchable searchaux smw-no-index my-1">
 								<div class="col-md-8 text-md-left text-center align-self-center"><h3 class="m-0"><span class="mw-headline">${aTypePlural}</span></h3></div>
 								<div class="col-md-4 text-md-right text-center align-self-center"><span class="btn btn-dark-green text-nowrap furtherresults"><a href="${searchURL}" title="Search">${mw.msg('neayirelatedpages-seeall', pages.length)}</a></span></div>

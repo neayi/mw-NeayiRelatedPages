@@ -1,0 +1,31 @@
+{
+    "@metadata": {
+            "authors": [
+                "Bertrand Gorge"
+            ]
+        },
+    "NeayiInteractions-desc": "Voegt Neayi-interactieblok toe aan wikipagina's",
+    "neayiinteractions-footer-text": "Als je dit artikel leuk vond, vergeet dan niet om het toe te juichen door hieronder te klikken.<br>Om op de hoogte te blijven van de ontwikkelingen, klik je op \"Volgen\".<br>als je je ervaringen rond dit onderwerp wilt delen met de community, klik op \"Ik doe\".",
+    "neayiinteractions-see-more": "Zie meer",
+    "neayiinteractions-interested-count": "{{PLURAL:$1|Eén geïnteresseerd|$1 geïnteresseerd}}",
+    "neayiinteractions-community-count": "{{PLURAL:$1|Eén persoon in discussie|$1 mensen in discussie}}",
+    "neayiinteractions-followed": "Opvolgen",
+    "neayiinteractions-follow": "Volgen",
+    "neayiinteractions-n-doers": "{{MEERVOUD:$1|$1 bezit|$1 bezit}}",
+    "neayiinteractions-nk-doers": "$1k boerderijen",
+    "neayiinteractions-done-it-confirmed": "Doen !",
+    "neayiinteractions-I-do-it": "Ik doe",
+    "neayiinteractions-I-do-it-production": "Ik doe",
+    "neayiinteractions-have-some-confirmed": "Ik heb er een paar!",
+    "neayiinteractions-I-have-some": "Ik heb er een paar",
+    "neayiinteractions-have-it-confirmed": "Ik heb het!",
+    "neayiinteractions-I-have-it": "Ik heb het",
+    "neayiinteractions-loading": "Laden...",
+    "neayiinteractions-map-departement": "<b>Afdeling:<\/b> $1",
+    "neayiinteractions-map-community-size": "<b>Gemeenschap:<\/b> $1",
+    "neayirelatedpages-seeall": "Bekijk alles ($1)",
+    "neayirelatedpages-desc": "Adds related pages sorted by type at the bottom of the current page",
+    "neayirelatedpages-i18n-welcome": "Welcome to the localization file of the NeayiRelatedPages extension.",
+    "neayirelatedpages-query+relatedpages-summary": "Returns a list of related pages",
+    "neayirelatedpages-relatedpages-example": "Return related pages for page Agroforesterie"
+}

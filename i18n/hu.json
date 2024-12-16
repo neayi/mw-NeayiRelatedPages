@@ -1,0 +1,31 @@
+{
+    "@metadata": {
+            "authors": [
+                "Bertrand Gorge"
+            ]
+        },
+    "NeayiInteractions-desc": "Hozzáadja a Neayi interakciós blokkot a wiki oldalakhoz",
+    "neayiinteractions-footer-text": "Ha tetszett a cikk, ne felejtse el megtapsolni az alábbi gombra kattintva.<br>Ha szeretne értesülni a fejleményekről, kattintson a \"Követés\" gombra.<br>Ha meg szeretné osztani tapasztalatait a témával kapcsolatos közösséggel, kattintson az \"Igen\" gombra.",
+    "neayiinteractions-see-more": "Lásd még",
+    "neayiinteractions-interested-count": "{{PLURAL:$1|Egy érdeklődő|$1 érdekelt}}",
+    "neayiinteractions-community-count": "{{PLURAL:$1|Egy személy a beszélgetésben|$1 személy a beszélgetésben}}",
+    "neayiinteractions-followed": "Kövesse nyomon",
+    "neayiinteractions-follow": "Kövesd",
+    "neayiinteractions-n-doers": "{{PLURAL:$1|$1 részesedés|$1 befektetés}}",
+    "neayiinteractions-nk-doers": "$1k gazdaság",
+    "neayiinteractions-done-it-confirmed": "Tedd !",
+    "neayiinteractions-I-do-it": "én igen",
+    "neayiinteractions-I-do-it-production": "én igen",
+    "neayiinteractions-have-some-confirmed": "nekem van néhány!",
+    "neayiinteractions-I-have-some": "nekem van néhány",
+    "neayiinteractions-have-it-confirmed": "megvan!",
+    "neayiinteractions-I-have-it": "megvan",
+    "neayiinteractions-loading": "Terhelés...",
+    "neayiinteractions-map-departement": "<b>Osztály:<\/b> $1",
+    "neayiinteractions-map-community-size": "<b>Közösség:<\/b> $1",
+    "neayirelatedpages-seeall": "Az összes megtekintése ($1)",
+    "neayirelatedpages-desc": "Adds related pages sorted by type at the bottom of the current page",
+    "neayirelatedpages-i18n-welcome": "Welcome to the localization file of the NeayiRelatedPages extension.",
+    "neayirelatedpages-query+relatedpages-summary": "Returns a list of related pages",
+    "neayirelatedpages-relatedpages-example": "Return related pages for page Agroforesterie"
+}

@@ -1,0 +1,31 @@
+{
+    "@metadata": {
+            "authors": [
+                "Bertrand Gorge"
+            ]
+        },
+    "NeayiInteractions-desc": "إضافة تفاعلات Neayi في صفحات الويكي",
+    "neayiinteractions-footer-text": "إذا أعجبك هذا المقال، فلا تنسى الإشادة به بالضغط أدناه.<br>للبقاء على اطلاع بالتطورات التي ستطرأ عليه، انقر فوق \"متابعة\".<br>إذا كنت تريد مشاركة تجربتك مع المجتمع حول هذا الموضوع، انقر فوق \"أفعل ذلك\".",
+    "neayiinteractions-see-more": "شاهد المزيد",
+    "neayiinteractions-interested-count": "{{PLURAL:$1|شخص واحد مهتم|$1 مهتم}}",
+    "neayiinteractions-community-count": "{{PLURAL:$1|شخص واحد في المناقشة|$1 شخص في المناقشة}}",
+    "neayiinteractions-followed": "متابعة",
+    "neayiinteractions-follow": "متابعة",
+    "neayiinteractions-n-doers": "{{PLURAL:$1|$1 مزرعة|$1 مزرعة}}",
+    "neayiinteractions-nk-doers": "$1k مزرعة",
+    "neayiinteractions-done-it-confirmed": "تم!",
+    "neayiinteractions-I-do-it": "أفعل ذلك",
+    "neayiinteractions-I-do-it-production": "أفعل بعض",
+    "neayiinteractions-have-some-confirmed": "لدي بعض!",
+    "neayiinteractions-I-have-some": "لدي تلك",
+    "neayiinteractions-have-it-confirmed": "لدي ذلك!",
+    "neayiinteractions-I-have-it": "لدي ذلك",
+    "neayiinteractions-loading": "جاري التحميل...",
+    "neayiinteractions-map-departement": "<b>المقاطعة:<\/b> $1",
+    "neayiinteractions-map-community-size": "<b>المجتمع:<\/b> $1",
+    "neayirelatedpages-seeall": "انظر الكل ($1)",
+    "neayirelatedpages-desc": "Adds related pages sorted by type at the bottom of the current page",
+    "neayirelatedpages-i18n-welcome": "Welcome to the localization file of the NeayiRelatedPages extension.",
+    "neayirelatedpages-query+relatedpages-summary": "Returns a list of related pages",
+    "neayirelatedpages-relatedpages-example": "Return related pages for page Agroforesterie"
+}

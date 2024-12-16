@@ -1,0 +1,31 @@
+{
+    "@metadata": {
+            "authors": [
+                "Bertrand Gorge"
+            ]
+        },
+    "NeayiInteractions-desc": "Agrega el bloque de interacción Neayi a las páginas wiki",
+    "neayiinteractions-footer-text": "Si te gustó este artículo, no olvides aplaudirlo haciendo clic a continuación.<br>Para mantenerte informado de las novedades, haz clic en \"Seguir\".<br>si quieres compartir tu experiencia con la comunidad en torno a este tema, haga clic en \"Acepto\".",
+    "neayiinteractions-see-more": "Ver más",
+    "neayiinteractions-interested-count": "{{PLURAL:$1|Un interesado|$1 interesado}}",
+    "neayiinteractions-community-count": "{{PLURAL:$1|Una persona en discusión|$1 personas en discusión}}",
+    "neayiinteractions-followed": "Hacer un seguimiento",
+    "neayiinteractions-follow": "Seguir",
+    "neayiinteractions-n-doers": "{{PLURAL:$1|$1 participación|$1 participación}}",
+    "neayiinteractions-nk-doers": "$1k granjas",
+    "neayiinteractions-done-it-confirmed": "Hacer !",
+    "neayiinteractions-I-do-it": "sí",
+    "neayiinteractions-I-do-it-production": "sí",
+    "neayiinteractions-have-some-confirmed": "¡Tengo algunos!",
+    "neayiinteractions-I-have-some": "tengo algunos",
+    "neayiinteractions-have-it-confirmed": "¡Lo tengo!",
+    "neayiinteractions-I-have-it": "lo tengo",
+    "neayiinteractions-loading": "Cargando...",
+    "neayiinteractions-map-departement": "<b>Departamento:<\/b> $1",
+    "neayiinteractions-map-community-size": "<b>Comunidad:<\/b> $1",
+    "neayirelatedpages-seeall": "Ver todo ($1)",
+    "neayirelatedpages-desc": "Adds related pages sorted by type at the bottom of the current page",
+    "neayirelatedpages-i18n-welcome": "Welcome to the localization file of the NeayiRelatedPages extension.",
+    "neayirelatedpages-query+relatedpages-summary": "Returns a list of related pages",
+    "neayirelatedpages-relatedpages-example": "Return related pages for page Agroforesterie"
+}

@@ -1,9 +1,13 @@
 {
-	"@metadata": {
-		"authors": []
-	},
-	"neayirelatedpages-desc": "Adds related pages sorted by type at the bottom of the current page",
-	"neayirelatedpages-i18n-welcome": "Welcome to the localization file of the NeayiRelatedPages extension.",
-	"apihelp-query+relatedpages-summary": "Returns a list of related pages",
-	"apihelp-relatedpages-example": "Return related pages for page Agroforesterie"
+    "@metadata": {
+            "authors": [
+                "Bertrand Gorge"
+            ]
+        },
+
+    "neayirelatedpages-seeall": "See all ($1)",
+    "neayirelatedpages-desc": "Adds related pages sorted by type at the bottom of the current page",
+    "neayirelatedpages-i18n-welcome": "Welcome to the localization file of the NeayiRelatedPages extension.",
+    "neayirelatedpages-query+relatedpages-summary": "Returns a list of related pages",
+    "neayirelatedpages-relatedpages-example": "Return related pages for page Agroforesterie"
 }

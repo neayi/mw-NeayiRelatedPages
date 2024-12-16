@@ -104,41 +104,48 @@ class APIRelatedPages extends ApiQueryBase {
 					new ValueDescription($value)
 				);
 
+				$query = new \SMWQuery($description);
+				$query->setLimit(100); // Adjust as needed
+				$query->sort = true;
+				$query->sortkeys['Number of page views'] = 'DESC';
+
 				// Use SMW Query API to execute the query
-				$queryResult = $smwStore->getQueryResult(
-					new \SMWQuery($description)
-				);
+				$queryResult = $smwStore->getQueryResult( $query );
 				
 				foreach ($queryResult->getResults() as $result) {
 					$relatedTitle = $result->getTitle();
 					$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
 				}
 
-				$toTitles = $title->getLinksTo();
-				foreach ($toTitles as $relatedTitle) {
-					$page = $this->wikiPageFactory->newFromTitle( $relatedTitle );
+				if (count($relatedTitles) < 10) {
+					// There's less than 10 pages that have the current page as a tag,
+					// let's add some more using direct links
 
-					if ($relatedTitle->isRedirect()) {
-						$moreToTitles = $relatedTitle->getLinksTo(); // there shouldn't be a need to recurse, no double redirections
-						foreach ($moreToTitles as $furtherTitle) {
-							$relatedTitles[$furtherTitle->getArticleID()] = $furtherTitle;
+					$toTitles = $title->getLinksTo();
+					foreach ($toTitles as $relatedTitle) {
+						$page = $this->wikiPageFactory->newFromTitle( $relatedTitle );
+	
+						if ($relatedTitle->isRedirect()) {
+							$moreToTitles = $relatedTitle->getLinksTo(); // there shouldn't be a need to recurse, no double redirections
+							foreach ($moreToTitles as $furtherTitle) {
+								$relatedTitles[$furtherTitle->getArticleID()] = $furtherTitle;
+							}
+						} else {
+							$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
 						}
-					} else {
-						$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
 					}
 
-				}
-			
-				$fromTitles = $title->getLinksFrom();
-				foreach ($fromTitles as $relatedTitle) {
-					$page = $this->wikiPageFactory->newFromTitle( $relatedTitle );
-
-					if ($relatedTitle->isRedirect()) {
-						$target = $redirectStore->getRedirectTarget($page);
-						$targetTitle = Title::newFromLinkTarget($target);
-						$relatedTitles[$targetTitle->getArticleID()] = $targetTitle;
-					} else {
-						$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
+					$fromTitles = $title->getLinksFrom();
+					foreach ($fromTitles as $relatedTitle) {
+						$page = $this->wikiPageFactory->newFromTitle( $relatedTitle );
+	
+						if ($relatedTitle->isRedirect()) {
+							$target = $redirectStore->getRedirectTarget($page);
+							$targetTitle = Title::newFromLinkTarget($target);
+							$relatedTitles[$targetTitle->getArticleID()] = $targetTitle;
+						} else {
+							$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
+						}
 					}
 				}
 				
@@ -160,7 +167,7 @@ class APIRelatedPages extends ApiQueryBase {
 					if (!empty($pageImages)) {
 						$pageImage = $pageImages[0]->getSortKey();
 						$file = MediaWikiServices::getInstance()->getRepoGroup()->findFile($pageImage);
-						$thumb = $file->transform(['width' => 150]);
+						$thumb = $file->transform(['width' => 200]);
 						$imageUrl = $thumb->getUrl();
 					}
 
@@ -204,7 +211,7 @@ class APIRelatedPages extends ApiQueryBase {
 	public function getExamplesMessages() {
 		return [
 			'action=query&prop=' . $this->getModuleName() . '&titles=Agroforesterie' =>
-			'apihelp-' . $this->getModuleName() . '-example'
+			'neayirelatedpages-' . $this->getModuleName() . '-example'
 		];
 	}
 

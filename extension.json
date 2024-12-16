@@ -55,7 +55,9 @@
 			"scripts": [
 				"modules/ext.neayiRelatedPages.js"
 			],
-			"messages": [],
+			"messages": [
+				"neayirelatedpages-seeall"
+			],
 			"dependencies": []
 		}
 	},

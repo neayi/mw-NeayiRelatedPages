@@ -40,19 +40,18 @@ var NeayiRelatedPages_controller = ( function () {
 
 				Object.keys(pageTypes).forEach(aType => {
 					let pages = pageTypes[aType];
-
-					let html = `    <div class="row navigation-not-searchable searchaux smw-no-index">
-							<div class="col-md-8 text-md-left text-center align-self-center">
-								<h3><span id="Retours_d.27exp.C3.A9rience"></span><span class="mw-headline">${aType}</span></h3>
-							</div>
+					
+					let searchURL = "/index.php?title=Search&filters=A+un+type+de+page%5E%5E"+encodeURIComponent(aType)+"&term=" + encodeURIComponent(mw.config.get("wgPageName"));
+					let html = `<div class="row navigation-not-searchable searchaux smw-no-index my-1">
+							<div class="col-md-8 text-md-left text-center align-self-center"><h3 class="m-0"><span class="mw-headline">${aType}</span></h3></div>
+							<div class="col-md-4 text-md-right text-center align-self-center"><span class="btn btn-dark-green text-nowrap furtherresults"><a href="${searchURL}" title="Search">${mw.msg('neayirelatedpages-seeall', pages.length)}</a></span></div>
 						</div>
-						<div class="row portal-store-results searchaux">`;
+						<div class="row portal-store-results searchaux">`
 
-					pages.forEach(aPage => {
-
+					pages.slice(0, 6).forEach(aPage => {
 						let title = aPage.Title;
 						let imageURL = aPage.ImageURL;
-						let URL = encodeURI(aPage.URL);
+						let URL = aPage.URL;
 	
 						let imageNode = '';
 						if (imageURL.length > 0) {
@@ -67,7 +66,7 @@ var NeayiRelatedPages_controller = ( function () {
 						<div class="col-md-9">
 							<div class="card-body px-2 py-1">
 								<p class="mb-0"><span class="badge badge-light">${aType}</span></p>
-								<p class="card-text"><a href="/wiki/${URL}">${title}</a></p>
+								<p class="card-text"><a class="stretched-link" href="/wiki/${URL}">${title}</a></p>
 							</div>
 						</div>
 					</div>
@@ -77,12 +76,9 @@ var NeayiRelatedPages_controller = ( function () {
 					
 					html += '</div>';
 					relatedPagesDiv.append(html)
-
 				});
-
-			} );
+			});
 		}
-
 	};
 }());
 

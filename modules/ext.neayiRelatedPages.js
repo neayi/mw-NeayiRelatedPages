@@ -22,7 +22,7 @@ var NeayiRelatedPages_controller = ( function () {
 				api.get( {
 					'action': 'query',
 					'prop': 'relatedpages',
-					'titles': mw.config.get('wgTitle')
+					'titles': mw.config.get('wgPageName')
 				} )
 				.done( function ( data ) {
 	

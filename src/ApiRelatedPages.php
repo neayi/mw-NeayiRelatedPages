@@ -149,6 +149,9 @@ class APIRelatedPages extends ApiQueryBase {
 					}
 				}
 				
+				$countsByType = [];
+				$sort = 0;
+
 				foreach ($relatedTitles as $pageId => $title) {
 					
 					$subject = DIWikiPage::newFromTitle($title);
@@ -161,6 +164,20 @@ class APIRelatedPages extends ApiQueryBase {
 
 					foreach ($pageTypes as $valueObject) 
 						$pageTypesValues[] = $valueObject->getSortKey();
+
+					$maxReached = false;
+
+					foreach ($pageTypesValues as $pageType) {
+						if (!isset($countsByType[$pageType]))
+							$countsByType[$pageType] = 0;
+						$countsByType[$pageType]++;
+
+						if ($countsByType[$pageType] > 10)
+							$maxReached = true;
+					}
+					
+					if ($maxReached)
+						continue;
 
 					$imageUrl = '';
 					$pageImages = $smwStore->getPropertyValues( $subject, DIProperty::newFromUserLabel('Page Image') );
@@ -175,7 +192,8 @@ class APIRelatedPages extends ApiQueryBase {
 						'Title' => $title->getText(),
 						'URL' => $title->getPrefixedURL(),
 						'A un type de page' => $pageTypesValues,
-						'ImageURL' => $imageUrl
+						'ImageURL' => $imageUrl,
+						'SortIndex' => $sort++
 					];
 
 					$fit = $apiResult->addValue( [ 'query', 'pages', $pageId ], $this->getModuleName(), $r );

@@ -31,12 +31,19 @@ var NeayiRelatedPages_controller = ( function () {
 					let relatedPagesDiv = $($(".neayi-related-pages")[0]);
 					let pages = Object.values(data.query.pages);
 	
+					pages.sort((a, b) => {
+						if (a.relatedpages == undefined || b.relatedpages == undefined)
+							return 0;
+						
+						return a.relatedpages.SortIndex < b.relatedpages.SortIndex ? -1 : 1;
+					});
+
 					let pageTypes = {};
 	
 					pages.forEach(aPage => {
 						if (!aPage['relatedpages'])
 							return;
-	
+
 						let pageType = aPage['relatedpages']['A un type de page'];
 	
 						pageType.forEach(aType => {
@@ -58,9 +65,13 @@ var NeayiRelatedPages_controller = ( function () {
 						let pages = pageTypes[aType];
 						
 						let searchURL = "/index.php?title=Search&filters=A+un+type+de+page%5E%5E"+encodeURIComponent(aType)+"&term=" + encodeURIComponent(mw.config.get("wgTitle"));
+						let count = pages.length;
+						if (count == 10)
+							count = '10+';
+
 						let html = `<div class="row navigation-not-searchable searchaux smw-no-index my-1">
 								<div class="col-md-8 text-md-left text-center align-self-center"><h3 class="m-0"><span class="mw-headline">${aTypePlural}</span></h3></div>
-								<div class="col-md-4 text-md-right text-center align-self-center"><span class="btn btn-dark-green text-nowrap furtherresults"><a href="${searchURL}" title="Search">${mw.msg('neayirelatedpages-seeall', pages.length)}</a></span></div>
+								<div class="col-md-4 text-md-right text-center align-self-center"><span class="btn btn-dark-green text-nowrap furtherresults"><a href="${searchURL}" title="Search">${mw.msg('neayirelatedpages-seeall', count)}</a></span></div>
 							</div>
 							<div class="row portal-store-results searchaux">`
 	
@@ -70,7 +81,7 @@ var NeayiRelatedPages_controller = ( function () {
 							let URL = aPage.URL;
 		
 							let imageNode = '';
-							if (imageURL.length > 0) {
+							if (imageURL && imageURL.length > 0) {
 								imageNode = `<a href="/wiki/${URL}"
 									title="${title}"><img src="${imageURL}" decoding="async" class="card-img""></a>`;
 							}

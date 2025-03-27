@@ -4,8 +4,11 @@ var NeayiRelatedPages_controller = ( function () {
 	return {
 
 		initialize: function () {
+			
+			var pageId = mw.config.get('wgArticleId');
+			if (pageId == 0)
+				return;
 
-			console.log('Neayi Related Pages');
 			
 			var api = new mw.Api();
 
@@ -17,7 +20,6 @@ var NeayiRelatedPages_controller = ( function () {
 			} )
 			.done( function ( data ) {
 				let categories = JSON.parse(data.expandtemplates.wikitext);
-				console.log(categories);
 
 				api.get( {
 					'action': 'query',
@@ -26,9 +28,8 @@ var NeayiRelatedPages_controller = ( function () {
 				} )
 				.done( function ( data ) {
 	
-					console.log(data);
-	
-					let relatedPagesDiv = $($(".neayi-related-pages")[0]);
+					let relatedPagesDiv = $(".related-pages");
+
 					let pages = Object.values(data.query.pages);
 	
 					pages.sort((a, b) => {
@@ -55,6 +56,69 @@ var NeayiRelatedPages_controller = ( function () {
 	
 					});
 	
+
+					let relatedTags = [];
+
+					categories.forEach(aCat => {
+						let aType = aCat.singular;
+						let aTypePlural = aCat.plural;
+
+						if (pageTypes[aType] == undefined)
+							return;
+
+						relatedTags.push(`<a data-target="${aType}" class="btn btn-light-green text-white related-tag">${aTypePlural}</a>`);
+					});
+
+					relatedPagesDiv.append(`<div class="related-tags d-flex">
+			<div class="related-tags-scroll-left"><a>&lt;</a></div>
+			<div class="related-tags-scrollable">
+				<a data-target="" class="btn btn-dark-green text-white related-tag">${mw.msg('neayirelatedpages-all')}</a>${relatedTags.join('')}
+			</div>
+			<div class="related-tags-scroll-right"><a>&gt;</a></div>
+		</div>`);
+
+					$('.related-tag').on('click', function() {
+						let aType = $(this).data('target');
+
+						if (aType.length > 0) {
+							let typeclass = '.related-page-' + aType.toLowerCase().replace(' ', '-').replace(/[^0-9a-z]/g, '');
+							$('.very-small-card').hide();
+							$('.very-small-card' + typeclass).show();
+						}						
+						else
+							$('.very-small-card').show();
+					});
+
+					$('.related-tags-scroll-right').on('click', function() {
+						let scrollArea = $(this).siblings(".related-tags-scrollable");
+						let clientWidth = scrollArea[0].clientWidth;
+						let newScrollLeft = scrollArea.scrollLeft() + clientWidth / 2;
+						scrollArea.animate({ scrollLeft: newScrollLeft}, 500);
+					});
+
+					$('.related-tags-scroll-left').on('click', function() {
+						let scrollArea = $(this).siblings(".related-tags-scrollable");
+						let clientWidth = scrollArea[0].clientWidth;
+
+						let newScrollLeft = scrollArea.scrollLeft() - clientWidth / 2;
+						scrollArea.animate({ scrollLeft: newScrollLeft}, 500);
+					});
+
+					$('.related-tags-scrollable').on('scroll', function() {
+						let scrollArea = $(this);
+						let newScrollLeft = scrollArea.scrollLeft();
+
+						if (newScrollLeft > 0)
+							$(this).siblings('.related-tags-scroll-left').show();
+						else
+							$(this).siblings('.related-tags-scroll-left').hide();
+
+						if (scrollArea[0].scrollWidth - scrollArea[0].clientWidth <= newScrollLeft + 5)
+							$(this).siblings('.related-tags-scroll-right').hide();
+						else
+							$(this).siblings('.related-tags-scroll-right').show();
+					});
+
 					categories.forEach(aCat => {
 						let aType = aCat.singular;
 						let aTypePlural = aCat.plural;
@@ -64,16 +128,7 @@ var NeayiRelatedPages_controller = ( function () {
 
 						let pages = pageTypes[aType];
 						
-						let searchURL = "/index.php?title=Search&filters=A+un+type+de+page%5E%5E"+encodeURIComponent(aType)+"&term=" + encodeURIComponent(mw.config.get("wgTitle"));
-						let count = pages.length;
-						if (count == 10)
-							count = '10+';
-
-						let html = `<div class="row navigation-not-searchable searchaux smw-no-index my-1">
-								<div class="col-md-8 text-md-left text-center align-self-center"><h3 class="m-0"><span class="mw-headline">${aTypePlural}</span></h3></div>
-								<div class="col-md-4 text-md-right text-center align-self-center"><span class="btn btn-dark-green text-nowrap furtherresults"><a href="${searchURL}" title="Search">${mw.msg('neayirelatedpages-seeall', count)}</a></span></div>
-							</div>
-							<div class="row portal-store-results searchaux">`
+						let html = '';
 	
 						pages.slice(0, 6).forEach(aPage => {
 							let title = aPage.Title;
@@ -86,22 +141,21 @@ var NeayiRelatedPages_controller = ( function () {
 									title="${title}"><img src="${imageURL}" decoding="async" class="card-img""></a>`;
 							}
 		
-							html += `<div class="col-xl-6 mb-lg-0 mb-3">
-					<div class="very-small-card card mb-3">
+							let typeclass = 'related-page-' + aType.toLowerCase().replace(' ', '-').replace(/[^0-9a-z]/g, '');
+
+							html += `<div class="very-small-card card mb-3 ${typeclass}">
 						<div class="row no-gutters">
-							<div class="col-md-3 image-col">${imageNode}</div>
-							<div class="col-md-9">
+							<div class="col-4 image-col">${imageNode}</div>
+							<div class="col-8">
 								<div class="card-body px-2 py-1">
+									<p class="card-text mb-0"><a class="stretched-link" href="/wiki/${URL}">${title}</a></p>
 									<p class="mb-0"><span class="badge badge-light">${aType}</span></p>
-									<p class="card-text"><a class="stretched-link" href="/wiki/${URL}">${title}</a></p>
 								</div>
 							</div>
 						</div>
-					</div>
-				</div>`;
+					</div>`;
 						});		
 						
-						html += '</div>';
 						relatedPagesDiv.append(html)
 
 					});

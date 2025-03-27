@@ -4,8 +4,7 @@
                 "Bertrand Gorge"
             ]
         },
-
-    "neayirelatedpages-seeall": "See all ($1)",
+    "neayirelatedpages-all": "All",
     "neayirelatedpages-desc": "Adds related pages sorted by type at the bottom of the current page",
     "neayirelatedpages-i18n-welcome": "Welcome to the localization file of the NeayiRelatedPages extension.",
     "neayirelatedpages-query+relatedpages-summary": "Returns a list of related pages",

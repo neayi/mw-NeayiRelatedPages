@@ -66,13 +66,13 @@ var NeayiRelatedPages_controller = ( function () {
 						if (pageTypes[aType] == undefined)
 							return;
 
-						relatedTags.push(`<a data-target="${aType}" class="btn btn-light-green text-white related-tag">${aTypePlural}</a>`);
+						relatedTags.push(`<a data-target="${aType}" class="btn related-tag">${aTypePlural}</a>`);
 					});
 
 					relatedPagesDiv.append(`<div class="related-tags d-flex">
 			<div class="related-tags-scroll-left"><a>&lt;</a></div>
 			<div class="related-tags-scrollable">
-				<a data-target="" class="btn btn-dark-green text-white related-tag">${mw.msg('neayirelatedpages-all')}</a>${relatedTags.join('')}
+				<a data-target="" class="btn related-tag active">${mw.msg('neayirelatedpages-all')}</a>${relatedTags.join('')}
 			</div>
 			<div class="related-tags-scroll-right"><a>&gt;</a></div>
 		</div>`);
@@ -80,6 +80,9 @@ var NeayiRelatedPages_controller = ( function () {
 					$('.related-tag').on('click', function() {
 						let aType = $(this).data('target');
 
+						$('.related-tag').removeClass('active');
+						$(this).addClass('active');
+						
 						if (aType.length > 0) {
 							let typeclass = '.related-page-' + aType.toLowerCase().replace(' ', '-').replace(/[^0-9a-z]/g, '');
 							$('.very-small-card').hide();

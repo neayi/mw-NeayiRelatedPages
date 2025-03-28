@@ -32,8 +32,8 @@
 	},
 	"Hooks": {
 		
-		"ParserFirstCallInit": [
-			"NeayiRelatedPagesHooks::onParserFirstCallInit"
+		"BeforePageDisplay": [
+			"NeayiRelatedPagesHooks::initializeJS"
 		]
 	},
 	"APIPropModules": {
@@ -56,7 +56,8 @@
 				"modules/ext.neayiRelatedPages.js"
 			],
 			"messages": [
-				"neayirelatedpages-seeall"
+                "neayirelatedpages-all",
+                "neayirelatedpages-desc"
 			],
 			"dependencies": []
 		}

@@ -24,7 +24,12 @@ use ApiMain;
 use ConfigFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\WikiPageFactory;
-use Title;
+use MediaWiki\Title\Title;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\RevisionLookup;
+use MediaWiki\Parser\ParserOutput;
+use RequestContext;
+
 use WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -42,7 +47,7 @@ class APIRelatedPages extends ApiQueryBase {
 	 * Bump when memcache needs clearing
 	 */
 	private const CACHE_VERSION = 2;
-	
+
 	private const PREFIX = 'rp';
 
 	/**
@@ -54,13 +59,19 @@ class APIRelatedPages extends ApiQueryBase {
 	 * @var WANObjectCache
 	 */
 	private $cache;
-	
+
 	/**
 	 * @var WikiPageFactory
 	 */
 	private $wikiPageFactory;
 
-	
+	/**
+	 * @var SMW\Store
+	 */
+	private $smwStore;
+
+	private $categoriesPlurals = [];
+
 	/**
 	 * @param \ApiQuery $query API query module object
 	 * @param string $moduleName Name of this query module
@@ -78,6 +89,8 @@ class APIRelatedPages extends ApiQueryBase {
 		parent::__construct( $query, $moduleName, self::PREFIX );
 		$this->cache = $cache;
 		$this->wikiPageFactory = $wikiPageFactory;
+		$this->smwStore = StoreFactory::getStore();
+
 	}
 
 	/**
@@ -87,82 +100,40 @@ class APIRelatedPages extends ApiQueryBase {
 		$titles = $this->getPageSet()->getGoodPages();
 
         $apiResult = $this->getResult();
-		$redirectStore = MediaWikiServices::getInstance()->getRedirectStore();
 
-		$smwStore = StoreFactory::getStore();
-		
 		try {
+			$this->categoriesPlurals = $this->getCategoriesPlurals();
+
 			foreach ($titles as $titleIdentity) {
 				$relatedTitles = [];
 
 				$title = Title::castFromPageIdentity($titleIdentity);
-				
-				$property = DIProperty::newFromUserLabel('A un mot-clé');
-				$value = DIWikiPage::newFromTitle( $title );
-				$description = new SomeProperty(
-					$property,
-					new ValueDescription($value)
-				);
 
-				$query = new \SMWQuery($description);
-				$query->setLimit(100); // Adjust as needed
-				$query->sort = true;
-				$query->sortkeys['Number of page views'] = 'DESC';
+				$relatedTitles = $relatedTitles + $this->getTitlesThatHaveTheSameTags($title);
 
-				// Use SMW Query API to execute the query
-				$queryResult = $smwStore->getQueryResult( $query );
-				
-				foreach ($queryResult->getResults() as $result) {
-					$relatedTitle = $result->getTitle();
-					$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
-				}
+				$relatedTitles = $relatedTitles + $this->getTitlesWithTag($title);
 
-				if (count($relatedTitles) < 10) {
-					// There's less than 10 pages that have the current page as a tag,
-					// let's add some more using direct links
+				// let's add some more articles using direct links
+				$relatedTitles = $relatedTitles + $this->getTitlesThatLinkToThis($title);
+				$relatedTitles = $relatedTitles + $this->getTitlesThatLinkFromThis($title);
 
-					$toTitles = $title->getLinksTo();
-					foreach ($toTitles as $relatedTitle) {
-						$page = $this->wikiPageFactory->newFromTitle( $relatedTitle );
-	
-						if ($relatedTitle->isRedirect()) {
-							$moreToTitles = $relatedTitle->getLinksTo(); // there shouldn't be a need to recurse, no double redirections
-							foreach ($moreToTitles as $furtherTitle) {
-								$relatedTitles[$furtherTitle->getArticleID()] = $furtherTitle;
-							}
-						} else {
-							$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
-						}
-					}
+				unset($relatedTitles[$title->getArticleID()]);
 
-					$fromTitles = $title->getLinksFrom();
-					foreach ($fromTitles as $relatedTitle) {
-						$page = $this->wikiPageFactory->newFromTitle( $relatedTitle );
-	
-						if ($relatedTitle->isRedirect()) {
-							$target = $redirectStore->getRedirectTarget($page);
-							$targetTitle = Title::newFromLinkTarget($target);
-							$relatedTitles[$targetTitle->getArticleID()] = $targetTitle;
-						} else {
-							$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
-						}
-					}
-				}
-				
 				$countsByType = [];
 				$sort = 0;
 
+				// Sort the pages per type and make sure we don't have more than 10 of each
 				foreach ($relatedTitles as $pageId => $title) {
-					
+
 					$subject = DIWikiPage::newFromTitle($title);
 
 					$pageTypesValues = [];
-					$pageTypes = $smwStore->getPropertyValues( $subject, DIProperty::newFromUserLabel('A un type de page') );
+					$pageTypes = $this->smwStore->getPropertyValues( $subject, DIProperty::newFromUserLabel('A un type de page') );
 
 					if (empty($pageTypes))
 						continue;
 
-					foreach ($pageTypes as $valueObject) 
+					foreach ($pageTypes as $valueObject)
 						$pageTypesValues[] = $valueObject->getSortKey();
 
 					$maxReached = false;
@@ -175,24 +146,17 @@ class APIRelatedPages extends ApiQueryBase {
 						if ($countsByType[$pageType] > 10)
 							$maxReached = true;
 					}
-					
+
 					if ($maxReached)
 						continue;
-
-					$imageUrl = '';
-					$pageImages = $smwStore->getPropertyValues( $subject, DIProperty::newFromUserLabel('Page Image') );
-					if (!empty($pageImages)) {
-						$pageImage = $pageImages[0]->getSortKey();
-						$file = MediaWikiServices::getInstance()->getRepoGroup()->findFile($pageImage);
-						$thumb = $file->transform(['width' => 200]);
-						$imageUrl = $thumb->getUrl();
-					}
 
 					$r = [
 						'Title' => $title->getText(),
 						'URL' => $title->getPrefixedURL(),
-						'A un type de page' => $pageTypesValues,
-						'ImageURL' => $imageUrl,
+						'Page types' => array_map(function($element) {
+								return [$element, $this->categoriesPlurals[$element] ?? $element];
+							}, $pageTypesValues),
+						'ImageURL' => $this->getPageImageURL($subject),
 						'SortIndex' => $sort++
 					];
 
@@ -205,7 +169,7 @@ class APIRelatedPages extends ApiQueryBase {
 				// 	$this->setContinueEnumParameter( 'continue', $continue + $count - 1 );
 				// 	break;
 				// }
-	
+
 			}
 
 		} catch (\Exception $e) {
@@ -213,7 +177,136 @@ class APIRelatedPages extends ApiQueryBase {
 		}
 
 	}
-    
+
+	private function getTitlesThatHaveTheSameTags(Title $title) {
+		$relatedTitles = [];
+		$relatedTitlesScores = [];
+
+		// Start by getting the tags from the current title:
+		$subject = DIWikiPage::newFromTitle($title);
+
+		$propertiesToMatch = [  'A un mot-clé' => 5,
+								'A comme agriculteur' => 10,
+								'A un intervenant' => 10,
+								'A un cahier des charges' => 3,
+								'A une caractéristique' => 3,
+								'A un objectif' => 5,
+								'A un sol' => 1,
+								'Est dans le département' => 4];
+
+		foreach ($propertiesToMatch as $aProperty => $weight) {
+			$values = $this->smwStore->getPropertyValues( $subject, DIProperty::newFromUserLabel($aProperty) );
+			foreach ($values as $aValue) {
+				$valueTitle = $aValue->getTitle();
+
+				$otherTitlesWithThisTag = $this->getTitlesWithProperty( $aProperty, $valueTitle, 300 );
+
+				foreach ($otherTitlesWithThisTag as $pageId => $title) {
+					$relatedTitles[$pageId] = $title;
+
+					if (isset($relatedTitlesScores[$pageId]))
+						$relatedTitlesScores[$pageId] = $relatedTitlesScores[$pageId] + $weight;
+					else
+						$relatedTitlesScores[$pageId] = $weight;
+				}
+			}
+		}
+
+		asort($relatedTitlesScores);
+		$relatedTitlesScores = array_slice(array_reverse($relatedTitlesScores, true), 0, 50, true);
+
+		foreach ($relatedTitlesScores as $pageId => $score)
+			$relatedTitlesScores[$pageId] = $relatedTitles[$pageId];
+
+		return $relatedTitlesScores;
+	}
+
+	private function getTitlesWithTag(Title $tag, $limit = 100) {
+		return $this->getTitlesWithProperty('A un mot-clé', $tag, $limit);
+	}
+
+	private function getTitlesWithProperty( $aProperty, $valueTitle, $limit = 100 ) {
+		$relatedTitles = [];
+
+		$property = DIProperty::newFromUserLabel( $aProperty );
+		$value = DIWikiPage::newFromTitle( $valueTitle );
+		$description = new SomeProperty(
+			$property,
+			new ValueDescription($value)
+		);
+
+		$query = new \SMWQuery($description);
+		$query->setLimit($limit); // Adjust as needed
+		$query->sort = true;
+		$query->sortkeys['Number of page views'] = 'DESC';
+
+		// Use SMW Query API to execute the query
+		$queryResult = $this->smwStore->getQueryResult( $query );
+
+		foreach ($queryResult->getResults() as $result) {
+			$relatedTitle = $result->getTitle();
+			$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
+		}
+
+		return $relatedTitles;
+	}
+
+	private function getTitlesThatLinkToThis(Title $title) {
+		$relatedTitles = [];
+
+		$toTitles = $title->getLinksTo();
+
+		foreach ($toTitles as $relatedTitle) {
+			$page = $this->wikiPageFactory->newFromTitle( $relatedTitle );
+
+			if ($relatedTitle->isRedirect()) {
+				$moreToTitles = $relatedTitle->getLinksTo(); // there shouldn't be a need to recurse, no double redirections
+				foreach ($moreToTitles as $furtherTitle) {
+					$relatedTitles[$furtherTitle->getArticleID()] = $furtherTitle;
+				}
+			} else {
+				$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
+			}
+		}
+
+		return $relatedTitles;
+	}
+
+	private function getTitlesThatLinkFromThis(Title $title) {
+		$relatedTitles = [];
+		$redirectStore = MediaWikiServices::getInstance()->getRedirectStore();
+
+		$fromTitles = $title->getLinksFrom();
+		foreach ($fromTitles as $relatedTitle) {
+			$page = $this->wikiPageFactory->newFromTitle( $relatedTitle );
+
+			if ($relatedTitle->isRedirect()) {
+				$target = $redirectStore->getRedirectTarget($page);
+				$targetTitle = Title::newFromLinkTarget($target);
+				$relatedTitles[$targetTitle->getArticleID()] = $targetTitle;
+			} else {
+				$relatedTitles[$relatedTitle->getArticleID()] = $relatedTitle;
+			}
+		}
+
+		return $relatedTitles;
+	}
+
+	private function getPageImageURL(DIWikiPage $subject) {
+		$pageImages = $this->smwStore->getPropertyValues( $subject, DIProperty::newFromUserLabel('Page Image') );
+		if (empty($pageImages))
+			return '';
+
+		$pageImage = $pageImages[0]->getSortKey();
+		$file = MediaWikiServices::getInstance()->getRepoGroup()->findFile($pageImage);
+		if (!$file) {
+			return '';
+		}
+
+		$thumb = $file->transform(['width' => 200]);
+		return $thumb->getUrl();
+	}
+
 	/**
 	 * @return array allowed parameters
 	 */
@@ -238,5 +331,45 @@ class APIRelatedPages extends ApiQueryBase {
 	 */
 	public function needsToken() {
 		return false;
+	}
+
+	private function getCategoriesPlurals() {
+		$plurals = [];
+
+		try {
+			// expand the template TranslationArray
+			$title = Title::newFromText('TranslationArray', NS_TEMPLATE);
+
+			if ( !$title || !$title->exists() ) {
+				die( "Page does not exist." );
+			}
+
+			// Step 2: Get the WikiPage object
+			$wikiPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
+
+			// Step 3: Get the ParserOptions for the current user
+			$parserOptions = \ParserOptions::newFromUser( RequestContext::getMain()->getUser() );
+
+			// Step 4: Get the parsed output
+			$parserOutput = $wikiPage->getParserOutput( $parserOptions );
+
+			// Step 5: Get the HTML text
+			$html = $parserOutput->getText();
+
+			// Remove outer wrapper <div class="mw-parser-output">
+			$html = preg_replace( '/<div class="mw-parser-output">(.*)<\/div>/s', '$1', $html );
+
+			// Optionally: Remove surrounding <p> tags if present
+			$html = preg_replace( '/^<p>(.*)<\/p>$/s', '$1', $html );
+
+			$categories = json_decode($html, true);
+
+			foreach ($categories as $aCat)
+				$plurals[$aCat['singular']] = $aCat['plural'];
+
+		} catch (\Throwable $th) {
+		}
+
+		return $plurals;
 	}
 }

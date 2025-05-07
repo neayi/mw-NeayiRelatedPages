@@ -143,7 +143,7 @@ class APIRelatedPages extends ApiQueryBase {
 							$countsByType[$pageType] = 0;
 						$countsByType[$pageType]++;
 
-						if ($countsByType[$pageType] > 10)
+						if ($countsByType[$pageType] > 15)
 							$maxReached = true;
 					}
 
@@ -185,12 +185,13 @@ class APIRelatedPages extends ApiQueryBase {
 		// Start by getting the tags from the current title:
 		$subject = DIWikiPage::newFromTitle($title);
 
-		$propertiesToMatch = [  'A un mot-clé' => 5,
+		$propertiesToMatch = [  'A un mot-clé' => 6,
 								'A comme agriculteur' => 10,
 								'A un intervenant' => 10,
 								'A un cahier des charges' => 3,
+								'A une production' => 1,
 								'A une caractéristique' => 3,
-								'A un objectif' => 5,
+								'A un objectif' => 6,
 								'A un sol' => 1,
 								'Est dans le département' => 4];
 

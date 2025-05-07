@@ -239,7 +239,7 @@ class APIRelatedPages extends ApiQueryBase {
 		$query = new \SMWQuery($description);
 		$query->setLimit($limit); // Adjust as needed
 		$query->sort = true;
-		$query->sortkeys['Number of page views'] = 'DESC';
+		$query->sortkeys['Page ID'] = 'DESC';
 
 		// Use SMW Query API to execute the query
 		$queryResult = $this->smwStore->getQueryResult( $query );

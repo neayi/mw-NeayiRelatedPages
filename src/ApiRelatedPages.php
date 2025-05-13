@@ -188,16 +188,21 @@ class APIRelatedPages extends ApiQueryBase {
 		$propertiesToMatch = [  "A un mot-clé" => 6,
 								"A comme agriculteur" => 10,
 								"A un intervenant" => 10,
+								"A un objectif" => 6,
+								"Est dans le département" => 4,
+								"A une culture principale" => 10, // ITK
+								"Régule" => 5,
+								"Est dans le portail" => 5,
+							];
+
+		$bonusPropertiesToMatch = [
 								"A un cahier des charges" => 3,
 								"A une production" => 1,
 								"A une caractéristique" => 3,
-								"A un objectif" => 6,
 								"A un sol" => 1,
-								"Est dans le département" => 4,
-								"A une culture principale" => 10,
 								"Est complémentaire" => 5,
-								"Régule" => 5,
-
+								"A un type de production" => 5,
+								
 								// "A comme modèle ESR" => 5,
 								// "A comme photo d'agriculteur" => 5,
 								// "A des pépins" => 5,
@@ -206,7 +211,6 @@ class APIRelatedPages extends ApiQueryBase {
 								// "A un objectif Agrilismat" => 5,
 								// "A un pH de sol" => 5,
 								// "A un type de matériel" => 5,
-								// "A un type de production" => 5,
 								// "A un type de sol" => 5,
 								// "A un usage" => 5,
 								// "A une ferme" => 5,
@@ -219,7 +223,6 @@ class APIRelatedPages extends ApiQueryBase {
 								// "Défavorise" => 5,
 								// "Est dans l'exploitation" => 5,
 								// "Est dans la région" => 5,
-								// "Est dans le portail" => 5,
 								// "Est de type" => 5,
 								// "Est incompatible" => 5,
 								// "Est incompatible avec" => 5,
@@ -240,10 +243,19 @@ class APIRelatedPages extends ApiQueryBase {
 							
 							];
 
+		$productions = $this->smwStore->getPropertyValues( $subject, DIProperty::newFromUserLabel("A un type de production") );
+		// map the array of page titles to keep only the string value of the title
+		$productions = array_map(function($element) {
+			return $element->getSortKey();
+		}, $productions);
+
 		foreach ($propertiesToMatch as $aProperty => $weight) {
 			$values = $this->smwStore->getPropertyValues( $subject, DIProperty::newFromUserLabel($aProperty) );
 			foreach ($values as $aValue) {
 				$valueTitle = $aValue->getTitle();
+
+				if (in_array($aValue->getSortKey(), $productions))
+					continue; // Remove the productions from the list of tags
 
 				$otherTitlesWithThisTag = $this->getTitlesWithProperty( $aProperty, $valueTitle, 300 );
 
@@ -254,6 +266,22 @@ class APIRelatedPages extends ApiQueryBase {
 						$relatedTitlesScores[$pageId] = $relatedTitlesScores[$pageId] + $weight;
 					else
 						$relatedTitlesScores[$pageId] = $weight;
+				}
+			}
+		}
+
+		foreach ($bonusPropertiesToMatch as $aProperty => $weight) {
+			$values = $this->smwStore->getPropertyValues( $subject, DIProperty::newFromUserLabel($aProperty) );
+			foreach ($values as $aValue) {
+				$valueTitle = $aValue->getTitle();
+
+				$otherTitlesWithThisTag = $this->getTitlesWithProperty( $aProperty, $valueTitle, 300 );
+
+				foreach ($otherTitlesWithThisTag as $pageId => $title) {
+					$relatedTitles[$pageId] = $title;
+
+					if (isset($relatedTitlesScores[$pageId]))
+						$relatedTitlesScores[$pageId] = $relatedTitlesScores[$pageId] + $weight; // Only add weight to pages that have been found earlier
 				}
 			}
 		}

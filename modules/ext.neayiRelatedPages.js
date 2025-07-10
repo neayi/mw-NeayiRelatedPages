@@ -100,9 +100,19 @@ var NeayiRelatedPages_controller = ( function () {
 						$(this).siblings('.related-tags-scroll-right').show();
 				});
 
+				// Get the height of the .rightSide div
+				let rightSideHeight = $('.rightSide').height();
+
+
 				pages.forEach(aPage => {
 					if (!aPage['relatedpages'])
 						return;
+
+					let hide = '';
+					let newRightSideHeight = $('.rightSide').height();
+					if (newRightSideHeight > rightSideHeight) {
+						hide = 'style="display: none;"';
+					};
 
 					let html = '';
 
@@ -122,7 +132,7 @@ var NeayiRelatedPages_controller = ( function () {
 
 					let aType = aPage['relatedpages']['Page types'][0][0];
 
-					html = `<div class="very-small-card card mb-3 ${typeclass}">
+					html = `<div class="very-small-card card mb-3 ${typeclass}"  ${hide}>
 					<div class="row no-gutters">
 						<div class="col-4 image-col">${imageNode}</div>
 						<div class="col-8">

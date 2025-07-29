@@ -21,13 +21,13 @@ var NeayiRelatedPages_controller = ( function () {
 
 				let relatedPagesDiv = $(".related-pages");
 
-				let pages = Object.values(data.query.pages);
+				let pages = Object.values(data.query.pages).filter((page) => page.relatedpages != undefined);
 
 				pages.sort((a, b) => {
-					if (a.relatedpages == undefined || b.relatedpages == undefined)
-						return 0;
+					if (a.relatedpages.Priority != b.relatedpages.Priority)
+					 	return b.relatedpages.Priority - a.relatedpages.Priority;
 
-					return a.relatedpages.SortIndex < b.relatedpages.SortIndex ? -1 : 1;
+					return a.relatedpages.SortIndex - b.relatedpages.SortIndex;
 				});
 
 				let pageTypes = [];

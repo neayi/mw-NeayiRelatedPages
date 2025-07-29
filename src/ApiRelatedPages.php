@@ -109,6 +109,9 @@ class APIRelatedPages extends ApiQueryBase {
 
 				$title = Title::castFromPageIdentity($titleIdentity);
 
+				$relatedTitles = $relatedTitles + $this->getTitlesFromTagsOf($title);
+				$priorityArticles = $relatedTitles;
+
 				$relatedTitles = $relatedTitles + $this->getTitlesThatHaveTheSameTags($title);
 
 				$relatedTitles = $relatedTitles + $this->getTitlesWithTag($title);
@@ -160,6 +163,13 @@ class APIRelatedPages extends ApiQueryBase {
 						'SortIndex' => $sort++
 					];
 
+					if (isset($priorityArticles[$pageId]) ||
+						$title->getNamespace() == NS_TRAINING) {
+						$r['Priority'] = 1;
+					} else {
+						$r['Priority'] = 0;
+					}
+
 					$fit = $apiResult->addValue( [ 'query', 'pages', $pageId ], $this->getModuleName(), $r );
 				}
 
@@ -177,6 +187,24 @@ class APIRelatedPages extends ApiQueryBase {
 		}
 
 	}
+
+	private function getTitlesFromTagsOf(Title $title) {
+		$relatedTitles = [];
+		$tags = $this->smwStore->getPropertyValues( DIWikiPage::newFromTitle($title), DIProperty::newFromUserLabel('A un mot-clé') );
+
+		foreach ($tags as $tag) {
+			$tagTitle = $tag->getTitle();
+
+			// if the page has no article ID, then it is not a valid page, continue:
+			if ( !$tagTitle->getArticleID() ) {
+				continue;
+			}
+
+			$relatedTitles[$tagTitle->getArticleID()] = $tagTitle;
+		}
+
+		return $relatedTitles;
+	}	
 
 	private function getTitlesThatHaveTheSameTags(Title $title) {
 		$relatedTitles = [];

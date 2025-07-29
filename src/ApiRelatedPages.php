@@ -192,15 +192,25 @@ class APIRelatedPages extends ApiQueryBase {
 		$relatedTitles = [];
 		$tags = $this->smwStore->getPropertyValues( DIWikiPage::newFromTitle($title), DIProperty::newFromUserLabel('A un mot-clé') );
 
+		$productions = $this->smwStore->getPropertyValues( DIWikiPage::newFromTitle($title), DIProperty::newFromUserLabel('A un type de production') );
+		$productions = array_map(function($element) {
+					return $element->getTitle()->getArticleID();
+				}, $productions);
+
 		foreach ($tags as $tag) {
 			$tagTitle = $tag->getTitle();
+			$articleID = $tagTitle->getArticleID();
 
 			// if the page has no article ID, then it is not a valid page, continue:
-			if ( !$tagTitle->getArticleID() ) {
+			if ( !$articleID ) {
 				continue;
 			}
 
-			$relatedTitles[$tagTitle->getArticleID()] = $tagTitle;
+			if (in_array($articleID, $productions)) {
+				continue; // Remove the productions from the list of tags
+			}
+
+			$relatedTitles[$articleID] = $tagTitle;
 		}
 
 		return $relatedTitles;

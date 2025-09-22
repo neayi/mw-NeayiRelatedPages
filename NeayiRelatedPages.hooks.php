@@ -5,8 +5,8 @@
  * @file
  * @ingroup Extensions
  */
-	
-use Parser;
+
+use MediaWiki\Output\OutputPage;
  
 class NeayiRelatedPagesHooks {
 

@@ -476,8 +476,10 @@ class APIRelatedPages extends ApiQueryBase {
 
 			$categories = json_decode($html, true);
 
-			foreach ($categories as $aCat)
-				$plurals[$aCat['singular']] = $aCat['plural'];
+			if (is_array($categories)) {
+				foreach ($categories as $aCat)
+					$plurals[$aCat['singular']] = $aCat['plural'];
+			}
 
 		} catch (\Throwable $th) {
 		}

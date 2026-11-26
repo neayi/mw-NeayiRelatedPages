@@ -1,6 +1,12 @@
 var NeayiRelatedPages_controller = ( function () {
 	'use strict';
 
+	function escapeHtml(text) {
+		return String(text).replace(/[&<>"']/g, c => ({
+			'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+		})[c]);
+	}
+
 	return {
 
 		initialize: function () {
@@ -30,74 +36,60 @@ var NeayiRelatedPages_controller = ( function () {
 					return a.relatedpages.SortIndex - b.relatedpages.SortIndex;
 				});
 
+				// Collect the page types (in order of appearance) and count the pages of each type
 				let pageTypes = [];
-				let relatedTags = [];
+				let typeLabels = {};
+				let typeCounts = {};
 
 				pages.forEach(aPage => {
-					if (!aPage['relatedpages'])
-						return;
-
-					let pageType = aPage['relatedpages']['Page types'];
-
-					pageType.forEach(aType => {
-						if (pageTypes.indexOf(aType[0]) == -1) {
+					aPage['relatedpages']['Page types'].forEach(aType => {
+						if (typeCounts[aType[0]] === undefined) {
 							pageTypes.push(aType[0]);
-							relatedTags.push(`<a data-target="${aType[0]}" class="btn related-tag">${aType[1]}</a>`);
+							typeLabels[aType[0]] = aType[1];
+							typeCounts[aType[0]] = 0;
 						}
+						typeCounts[aType[0]]++;
 					});
 				});
 
-				relatedPagesDiv.append(`<div class="related-tags d-flex">
-		<div class="related-tags-scroll-left"><a>&lt;</a></div>
-		<div class="related-tags-scrollable">
-			<a data-target="" class="btn related-tag active">${mw.msg('neayirelatedpages-all')}</a>${relatedTags.join('')}
-		</div>
-		<div class="related-tags-scroll-right"><a>&gt;</a></div>
+				// Only keep the 5 types with the most pages (stable sort: ties keep their order of appearance)
+				pageTypes = pageTypes
+					.slice()
+					.sort((a, b) => typeCounts[b] - typeCounts[a])
+					.slice(0, 5);
+
+				let relatedTags = pageTypes.map(aType => `<button type="button" class="btn related-tag" aria-pressed="false" data-target="${escapeHtml(aType)}">${escapeHtml(typeLabels[aType])} <span class="related-tag-count">${typeCounts[aType]}</span></button>`);
+
+				relatedPagesDiv.append(`<div class="related-tags">
+		<button type="button" class="btn related-tag related-tag-all active" aria-pressed="true" data-target="">${escapeHtml(mw.msg('neayirelatedpages-all'))} <span class="related-tag-count">${pages.length}</span></button>${relatedTags.join('')}
 	</div>`);
 
-				$('.related-tag').on('click', function() {
-					let aType = $(this).data('target');
+				// Several types can be selected at once: a card is shown if it has at least one of the selected types.
+				// When no type is selected, "All" is active and every card is shown.
+				relatedPagesDiv.on('click', '.related-tag', function() {
+					let tagsDiv = $(this).closest('.related-tags');
+					let aType = $(this).attr('data-target');
 
-					$('.related-tag').removeClass('active');
-					$(this).addClass('active');
-
-					if (aType.length > 0) {
-						let typeclass = '.related-page-' + aType.toLowerCase().replace(' ', '-').replace(/[^0-9a-z]/g, '');
-						$('.very-small-card').hide();
-						$('.very-small-card' + typeclass).show();
+					if (aType === '') {
+						tagsDiv.find('.related-tag').removeClass('active').attr('aria-pressed', 'false');
+					} else {
+						let isActive = !$(this).hasClass('active');
+						$(this).toggleClass('active', isActive).attr('aria-pressed', isActive ? 'true' : 'false');
 					}
-					else
-						$('.very-small-card').show();
-				});
 
-				$('.related-tags-scroll-right').on('click', function() {
-					let scrollArea = $(this).siblings(".related-tags-scrollable");
-					let clientWidth = scrollArea[0].clientWidth;
-					let newScrollLeft = scrollArea.scrollLeft() + clientWidth / 2;
-					scrollArea.animate({ scrollLeft: newScrollLeft}, 500);
-				});
+					let selectedTypes = tagsDiv.find('.related-tag.active').not('.related-tag-all')
+						.map(function() { return $(this).attr('data-target'); }).get();
 
-				$('.related-tags-scroll-left').on('click', function() {
-					let scrollArea = $(this).siblings(".related-tags-scrollable");
-					let clientWidth = scrollArea[0].clientWidth;
+					tagsDiv.find('.related-tag-all')
+						.toggleClass('active', selectedTypes.length === 0)
+						.attr('aria-pressed', selectedTypes.length === 0 ? 'true' : 'false');
 
-					let newScrollLeft = scrollArea.scrollLeft() - clientWidth / 2;
-					scrollArea.animate({ scrollLeft: newScrollLeft}, 500);
-				});
-
-				$('.related-tags-scrollable').on('scroll', function() {
-					let scrollArea = $(this);
-					let newScrollLeft = scrollArea.scrollLeft();
-
-					if (newScrollLeft > 0)
-						$(this).siblings('.related-tags-scroll-left').show();
-					else
-						$(this).siblings('.related-tags-scroll-left').hide();
-
-					if (scrollArea[0].scrollWidth - scrollArea[0].clientWidth <= newScrollLeft + 5)
-						$(this).siblings('.related-tags-scroll-right').hide();
-					else
-						$(this).siblings('.related-tags-scroll-right').show();
+					tagsDiv.parent().find('.very-small-card').each(function() {
+						let cardTypes = $(this).data('types') || [];
+						let visible = selectedTypes.length === 0 ||
+							cardTypes.some(t => selectedTypes.indexOf(t) !== -1);
+						$(this).toggle(visible);
+					});
 				});
 
 				// Get the height of the .rightSide div
@@ -131,8 +123,9 @@ var NeayiRelatedPages_controller = ( function () {
 					}).join(' ');
 
 					let aType = aPage['relatedpages']['Page types'][0][0];
+					let types = escapeHtml(JSON.stringify(aPage['relatedpages']['Page types'].map(type => type[0])));
 
-					html = `<div class="very-small-card card mb-3 ${typeclass}"  ${hide}>
+					html = `<div class="very-small-card card mb-3 ${typeclass}" data-types="${types}" ${hide}>
 					<div class="row no-gutters">
 						<div class="col-4 image-col">${imageNode}</div>
 						<div class="col-8">

@@ -139,6 +139,10 @@ class APIRelatedPages extends ApiQueryBase {
 					foreach ($pageTypes as $valueObject)
 						$pageTypesValues[] = $valueObject->getSortKey();
 
+					// Skip pages that are not finished yet
+					if (in_array('Page en cours de rédaction', $pageTypesValues))
+						continue;
+
 					$maxReached = false;
 
 					foreach ($pageTypesValues as $pageType) {
